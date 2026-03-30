@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { LoginDTO, LoginSchema } from '../src/dto/LoginDTO'
-import { z } from "zod"
+import { z } from 'zod'
 
 test.describe('Login api tests', () => {
   const BaseEndpointURL = 'https://backend.tallinn-learning.ee/login/student'
@@ -19,8 +19,8 @@ test.describe('Login api tests', () => {
     })
 
     const token: z.infer<typeof LoginSchema> = await loginResponse.text()
-    const TestToken = LoginSchema.parse(token);
-    console.log(TestToken);
+    const TestToken = LoginSchema.parse(token)
+    console.log(TestToken)
     expect(loginResponse.status()).toBe(200)
     expect(token.length).toBeGreaterThan(0)
   })

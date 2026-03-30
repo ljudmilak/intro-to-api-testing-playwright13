@@ -13,8 +13,8 @@ test.describe('Lesson 11 -> Product API tests', () => {
     })
 
     const responseBody: Product[] = await response.json()
-    const firstProduct: Product = ProductSchema.parse(responseBody[0]);
-    expect(firstProduct.createdAt).toBeNull();
+    const firstProduct: Product = ProductSchema.parse(responseBody[0])
+    expect(firstProduct.createdAt).toBeNull()
     expect(response.status()).toBe(StatusCodes.OK)
     expect(responseBody.length).toBeDefined()
     expect(responseBody.length).toBeGreaterThanOrEqual(1)
