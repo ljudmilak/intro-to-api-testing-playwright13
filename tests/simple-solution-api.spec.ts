@@ -1,38 +1,58 @@
 import { expect, test } from '@playwright/test'
 
 import { StatusCodes } from 'http-status-codes'
-import { OrderDTO } from '../src/dto/OrderDTO'
+import { OrderDTO, OrderSchema } from '../src/dto/OrderDTO'
+import { Login, LoginDTO } from '../src/dto/LoginDTO'
+import { getJwt } from '../src/helpers/api-helper'
 
-test('get order with correct id should receive code 200', async ({ request }) => {
-  // Build and send a GET request to the server
-  const response = await request.get('https://backend.tallinn-learning.ee/test-orders/1')
-
-  // parse raw response body to json
-  const responseBody = await response.json()
-  const statusCode = response.status()
-
-  // Log the response status, body and headers
-  console.log('response body:', responseBody)
-  // Check if the response status is 200
-  expect(statusCode).toBe(200)
-})
+const ORDERS_URL = "https://backend.tallinn-learning.ee/orders"
+const AUTH_URL = "https://backend.tallinn-learning.ee/login/student"
 
 test('post order with correct data should receive code 201', async ({ request }) => {
-  console.log(OrderDTO.generateDefault())
-  // Send a POST request to the server
-  const response = await request.post('https://backend.tallinn-learning.ee/test-orders', {
-    data: OrderDTO.generateDefault(),
+  const token = await getJwt(request);
+
+  console.log('token' + token)
+  const response = await request.post(ORDERS_URL, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    data: OrderDTO.generateDefault()
   })
-  // parse raw response body to json
   const responseBody: OrderDTO = await response.json() //"age:20,title:'123'"
   const statusCode = response.status()
 
-  // Log the response status and body
   console.log('response status:', statusCode)
   console.log('response body:', responseBody)
   expect(statusCode).toBe(StatusCodes.OK)
-  // check that body.comment is string type
-  expect(typeof responseBody.id).toBe('number')
-  // check that body.courierId is number type
-  expect(typeof responseBody.courierId).toBe('number')
+  const TestOrder = OrderSchema.parse(responseBody);
+  expect(TestOrder.id).not.toBeUndefined()
 })
+
+test('get order with correct id should receive code 200', async ({ request }) => {
+  const loginResponse = await request.post(AUTH_URL, {
+    data: LoginDTO.generateCorrectPair(),
+  })
+  const token: Login = await loginResponse.text();
+
+  const response = await request.post(ORDERS_URL, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+    data: OrderDTO.generateDefault()
+  })
+  const responseBody: OrderDTO = await response.json()
+
+  const responseSearch = await request.get(`${ORDERS_URL}/${responseBody.id}`, {
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
+  })
+
+  const responseBodySearch: OrderDTO = await responseSearch.json()
+  const statusCode = responseSearch.status()
+  expect(statusCode).toBe(200)
+  const TestSearchOrder = OrderSchema.parse(responseBodySearch)
+  expect(TestSearchOrder.id).not.toBeUndefined()
+})
+
+
