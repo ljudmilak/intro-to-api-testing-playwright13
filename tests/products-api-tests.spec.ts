@@ -5,7 +5,7 @@ import { ProductDTO, ProductSchema, Product } from '../src/dto/ProductDTO'
 
 test.describe('Lesson 11 -> Product API tests', () => {
   const BaseEndpointURL = 'https://backend.tallinn-learning.ee/products'
-  const AUTH = { 'X-API-Key': 'my-secret-api-key' }
+ const AUTH = { 'X-API-Key': 'my-secret-api-key' }
 
   test('GET /products - check API returns array with length >= 1', async ({ request }) => {
     const response = await request.get(BaseEndpointURL, {
